@@ -67,7 +67,8 @@ namespace ClassGame {
                 }
                 ImGui::End();
 
-                ImGui::Begin("GameWindow");
+                ImGui::Begin("Game View");
+                
                 if (game) {
                     if (game->gameHasAI() && (game->getCurrentPlayer()->isAIPlayer() || game->_gameOptions.AIvsAI))
                     {

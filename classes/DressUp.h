@@ -22,11 +22,15 @@ class DressUp : public Game
 
 	void        updateAI() override;
     bool        gameHasAI() override { return true; }
-    Grid* getGrid() override { return _grid; }
+    Grid*       getDollGrid() { return _gridDoll; }
+    Grid*       getClothGrid() { return _gridCloth; }
+    Grid*       getGrid() override { return _gridCloth;} // including to satisfy virtual override
+    void        drawFrame() override; // we need to make our own custom version of draw frame to draw all the grids
 private:
     Bit *       PieceForPlayer(const int playerNumber);
     Player*     ownerAt(int index ) const;
-    // int         negamax(std::string& state, int depth, int playerColor);
-
-    Grid*       _grid;
+    // int         negamax(std::string& state, int depth, int playerColor)
+    
+    Grid*       _gridDoll;
+    Grid*       _gridCloth;
 };

@@ -1,39 +1,58 @@
 #include "DressUp.h"
+#include "../imgui/imgui.h"
+
 //This is all really just to ensure when we press the button to open the game something is showing. Not attached to anything that exists here yet, and it barely works anyways
 DressUp::DressUp()
 {
-    _grid = new Grid(2, 4);
+    _gridCloth = new Grid(4, 4);
+    _gridDoll = new Grid(1, 4);
 }
 
 DressUp::~DressUp()
 {
-    delete _grid;
+    delete _gridCloth;
+    delete _gridDoll; 
 }
 
 void DressUp::setUpBoard()
 {
-    setNumberOfPlayers(2);
-    _gameOptions.rowX = 2;
+    setNumberOfPlayers(1);
+    _gameOptions.rowX = 4;
     _gameOptions.rowY = 4;
-    _grid->initializeSquares(260, "square.png");
 
-    // if (gameHasAI()) {
-    //     setAIPlayer(AI_PLAYER);
-    // }
+    // Hard define the doll square placements
+    // x = horizontal offset
+    // y = vertical offset
+    // 
+
+    for (int y = 0; y < getDollGrid()->getHeight() ; y++) {
+        for (int x = 0; x < getDollGrid()->getWidth(); x++) {
+            //Grid::initializeSquaresWithOffset(x, y, squareSize, spriteName);
+        }
+    }
+    
+    // hard define the cloth square placements
+    _gridDoll->initializeSquares(260, "clothing_square.png");
+    _gridCloth->initializeSquares(260, "clothing_square.png");
+
+    // Set the offset of each grid
 
     startGame();
 }
 
-//This will need to be modified to be whichever clothing piece the player selects?
-Bit* DressUp::PieceForPlayer(const int playerNumber)
-{
-    // depending on playerNumber load the "x.png" or the "o.png" graphic
-    Bit *bit = new Bit();
-    // should possibly be cached from player class?
-    bit->LoadTextureFromFile(playerNumber == AI_PLAYER ? "o.png" : "x.png");
-    bit->setOwner(getPlayerAt(playerNumber == AI_PLAYER ? 1 : 0));
-    return bit;
+
+Player* DressUp::checkForWinner(){return nullptr;}
+
+bool DressUp::checkForDraw(){return false;}
+
+std::string DressUp::initialStateString(){return "0000000000";}
+
+std::string DressUp::stateString(){
+    std::string s = "0000000000";
+    return s;
 }
+
+void DressUp::setStateString(const std::string &s){}
 
 bool DressUp::actionForEmptyHolder(BitHolder &holder)
 {
@@ -51,100 +70,83 @@ bool DressUp::actionForEmptyHolder(BitHolder &holder)
     return false;
 }
 
+
+
+
+
 bool DressUp::canBitMoveFrom(Bit &bit, BitHolder &src)
 {
     // you will eventually be able to move clothing pieces
     return false;
 }
 
-bool DressUp::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst)
-{
-    // you will eventually be able to move clothing pieces
-    return false;
-}
+bool DressUp::canBitMoveFromTo(Bit &bit, BitHolder &src, BitHolder &dst) {return false;}
 
 void DressUp::stopGame()
 {
     //can use as our "clear all" button?
-    _grid->forEachSquare([](ChessSquare* square, int x, int y) {
+    _gridCloth->forEachSquare([](ChessSquare* square, int x, int y) {
         square->destroyBit();
     });
-}
-
-Player* DressUp::ownerAt(int index ) const
-{
-    //i dunno if this is even necessary. theres only 1 player
-    auto square = _grid->getSquare(index % 3, index / 3);
-    if (!square || !square->bit()) {
-        return nullptr;
-    }
-    return square->bit()->getOwner();
-}
-
-Player* DressUp::checkForWinner()
-{
-    //also probably not needed. there's no win state
-    static const int kWinningTriples[8][3] =  { {0,1,2}, {3,4,5}, {6,7,8},  // rows
-                                                {0,3,6}, {1,4,7}, {2,5,8},  // cols
-                                                {0,4,8}, {2,4,6} };         // diagonals
-    for( int i=0; i<8; i++ ) {
-        const int *triple = kWinningTriples[i];
-        Player *player = ownerAt(triple[0]);
-        if( player && player == ownerAt(triple[1]) && player == ownerAt(triple[2]) )
-            return player;
-    }
-    return nullptr;
-}
-
-bool DressUp::checkForDraw()
-{
-    //don't need this either i think
-    bool isDraw = true;
-    // check to see if the board is full
-    _grid->forEachSquare([&isDraw](ChessSquare* square, int x, int y) {
-        if (!square->bit()) {
-            isDraw = false;
-        }
-    });
-    return isDraw;
-}
-
-std::string DressUp::initialStateString()
-{
-    //state string could be useful for that "randomize" idea?
-    //I extended state string by one so that it doesn't go out of bounds trying to update
-    return "0000000000";
-}
-
-std::string DressUp::stateString()
-{
-    std::string s = "0000000000";
-    _grid->forEachSquare([&](ChessSquare* square, int x, int y) {
-        Bit *bit = square->bit();
-        if (bit) {
-            s[y * 3 + x] = std::to_string(bit->getOwner()->playerNumber()+1)[0];
-        }
-    });
-    return s;
-}
-
-void DressUp::setStateString(const std::string &s)
-{
-    _grid->forEachSquare([&](ChessSquare* square, int x, int y) {
-        int index = y*3 + x;
-        int playerNumber = s[index] - '0';
-        if (playerNumber) {
-            square->setBit( PieceForPlayer(playerNumber-1) );
-        } else {
-            square->setBit( nullptr );
-        }
+        //can use as our "clear all" button?
+    _gridDoll->forEachSquare([](ChessSquare* square, int x, int y) {
+        square->destroyBit();
     });
 }
 
 void DressUp::updateAI() 
 {
-    //don't need ai
+    
+}
+
+// Implemented in DressUp.h
+//  GameHasAI()
+//  GetDollGrid()
+//  GetClothGrid()
+
+
+void DressUp::drawFrame()
+{
+	scanForMouse();
+
+	_gridDoll = DressUp::getDollGrid();
+    _gridCloth = getClothGrid();
+
+    ImVec2 dollGridPosition = ImVec2(50, 50);
+    ImGui::SetCursorPos(dollGridPosition);
+
+    _gridDoll->forEachEnabledSquare([](ChessSquare* square, int x, int y){
+        square->paintSprite();
+    });
+
+    ImVec2 clothGridPosition = ImVec2(500, 50);
+    ImGui::SetCursorPos(clothGridPosition);
+
+    _gridCloth->forEachEnabledSquare([](ChessSquare* square, int x, int y){
+        square->paintSprite();
+    });
+
 }
 
 
 
+//This will need to be modified to be whichever clothing piece the player selects?
+Bit* DressUp::PieceForPlayer(const int playerNumber)
+{
+    // depending on playerNumber load the "x.png" or the "o.png" graphic
+    Bit *bit = new Bit();
+    // should possibly be cached from player class?
+    bit->LoadTextureFromFile(playerNumber == AI_PLAYER ? "o.png" : "x.png");
+    bit->setOwner(getPlayerAt(playerNumber == AI_PLAYER ? 1 : 0));
+    return bit;
+}
+
+Player* DressUp::ownerAt(int index ) const
+{
+    //i dunno if this is even necessary. theres only 1 player
+    auto square = _gridCloth->getSquare(index % 3, index / 3);
+    if (!square || !square->bit()) {
+        return nullptr;
+    }
+    return square->bit()->getOwner();
+}

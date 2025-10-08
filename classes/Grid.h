@@ -56,6 +56,7 @@ public:
     // Initialize squares with positions and sprites
     void initializeSquares(float squareSize, const char* spriteName);
     void initializeSquare(int x, int y, float squareSize, const char* spriteName);
+    void initializeSquaresWithOffset(int boardOffsetX, int boardOffsetY, int squareSize, const char* spriteName);
 
     // State management (for enabled squares only)
     std::string getStateString() const;

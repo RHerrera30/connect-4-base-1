@@ -188,6 +188,18 @@ void Grid::initializeSquare(int x, int y, float squareSize, const char* spriteNa
     }
 }
 
+void Grid::initializeSquaresWithOffset(int boardOffsetX, int boardOffsetY, int squareSize, const char* spriteName){
+    for (int y = 0; y < _height; y++) {
+        for (int x = 0; x < _width; x++) {
+            // initSquare
+            if (isValid(x, y)) {
+                ImVec2 position(squareSize * x + squareSize/2 + boardOffsetX, squareSize * y + squareSize/2 + boardOffsetY);
+                _squares[y][x]->initHolder(position, spriteName, x, y);
+            }
+        }
+    }
+}
+
 // State management
 std::string Grid::getStateString() const
 {
