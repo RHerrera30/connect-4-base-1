@@ -2,7 +2,7 @@
 //This is all really just to ensure when we press the button to open the game something is showing. Not attached to anything that exists here yet, and it barely works anyways
 DressUp::DressUp()
 {
-    _grid = new Grid(4, 5);
+    _grid = new Grid(2, 4);
 }
 
 DressUp::~DressUp()
@@ -13,9 +13,9 @@ DressUp::~DressUp()
 void DressUp::setUpBoard()
 {
     setNumberOfPlayers(2);
-    _gameOptions.rowX = 4;
-    _gameOptions.rowY = 5;
-    _grid->initializeSquares(160, "square.png");
+    _gameOptions.rowX = 2;
+    _gameOptions.rowY = 4;
+    _grid->initializeSquares(260, "square.png");
 
     // if (gameHasAI()) {
     //     setAIPlayer(AI_PLAYER);
@@ -112,12 +112,13 @@ bool DressUp::checkForDraw()
 std::string DressUp::initialStateString()
 {
     //state string could be useful for that "randomize" idea?
-    return "000000000";
+    //I extended state string by one so that it doesn't go out of bounds trying to update
+    return "0000000000";
 }
 
 std::string DressUp::stateString()
 {
-    std::string s = "000000000";
+    std::string s = "0000000000";
     _grid->forEachSquare([&](ChessSquare* square, int x, int y) {
         Bit *bit = square->bit();
         if (bit) {
