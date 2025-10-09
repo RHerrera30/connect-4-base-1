@@ -17,25 +17,18 @@ DressUp::~DressUp()
 void DressUp::setUpBoard()
 {
     setNumberOfPlayers(1);
-    _gameOptions.rowX = 4;
-    _gameOptions.rowY = 4;
-
-    // Hard define the doll square placements
-    // x = horizontal offset
-    // y = vertical offset
-    // 
-
-    for (int y = 0; y < getDollGrid()->getHeight() ; y++) {
-        for (int x = 0; x < getDollGrid()->getWidth(); x++) {
-            //Grid::initializeSquaresWithOffset(x, y, squareSize, spriteName);
-        }
-    }
-    
-    // hard define the cloth square placements
-    _gridDoll->initializeSquares(260, "clothing_square.png");
-    _gridCloth->initializeSquares(260, "clothing_square.png");
+    // _gameOptions.rowX = 4;
+    // _gameOptions.rowY = 4;
 
     // Set the offset of each grid
+    int offsetX = 0;
+    int offsetY = 0;
+    int spriteSize = 100;
+    const char * spriteName = "square.png";
+    _gridDoll->initializeSquaresWithOffset(offsetX, offsetY, spriteSize, spriteName);
+    offsetX = (spriteSize * _gridDoll->getWidth()) + spriteSize; // offsets by the width of the doll board, plus one sprite width
+    offsetY = 0; // we don't need to shift vertically here
+    _gridCloth->initializeSquaresWithOffset(offsetX, offsetY, spriteSize, spriteName);
 
     startGame();
 }
@@ -45,29 +38,43 @@ Player* DressUp::checkForWinner(){return nullptr;}
 
 bool DressUp::checkForDraw(){return false;}
 
-std::string DressUp::initialStateString(){return "0000000000";}
+std::string DressUp::initialStateString(){return "0000 0000 0000 0000 0000";}
 
 std::string DressUp::stateString(){
-    std::string s = "0000000000";
+    std::string s = "0000 0000 0000 0000 0000";
     return s;
 }
 
-void DressUp::setStateString(const std::string &s){}
+void DressUp::setStateString(const std::string &s){
+    // first 4 bits will be the doll
+    
+    // other 16 bits will be the clothing spaces
+}
 
 bool DressUp::actionForEmptyHolder(BitHolder &holder)
 {
+    ImVec2 holderPosition = holder.getPosition();
+    //printf("Clicked holder at position: (%f, %f)\n", holderPosition.x, holderPosition.y);
+    //printf("Holder pointer: %p, Bit pointer: %p\n", &holder, holder.bit());
+
+    
+    std::cout << "Pos: " << "Clicked holder at position:" << holderPosition.x << holderPosition.y << std::endl;
     //Will need to adapt for replacing an item the doll already is wearing
     if (holder.bit()) {
         return false;
     }
+
     Bit *bit = PieceForPlayer(getCurrentPlayer()->playerNumber() == 0 ? HUMAN_PLAYER : AI_PLAYER);
     if (bit) {
         bit->setPosition(holder.getPosition());
         holder.setBit(bit);
-        endTurn();
+        //endTurn();
         return true;
     }   
     return false;
+
+
+
 }
 
 
@@ -114,6 +121,7 @@ void DressUp::drawFrame()
 
     ImVec2 dollGridPosition = ImVec2(50, 50);
     ImGui::SetCursorPos(dollGridPosition);
+    ImGui::Dummy(ImVec2(260, 260));
 
     _gridDoll->forEachEnabledSquare([](ChessSquare* square, int x, int y){
         square->paintSprite();
@@ -121,6 +129,7 @@ void DressUp::drawFrame()
 
     ImVec2 clothGridPosition = ImVec2(500, 50);
     ImGui::SetCursorPos(clothGridPosition);
+    ImGui::Dummy(ImVec2(260, 260));
 
     _gridCloth->forEachEnabledSquare([](ChessSquare* square, int x, int y){
         square->paintSprite();
