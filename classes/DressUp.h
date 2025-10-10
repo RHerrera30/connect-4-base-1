@@ -30,6 +30,7 @@ class DressUp : public Game
 private:
     Bit *       PieceForPlayer(const int playerNumber);
     Player*     ownerAt(int index ) const;
+    bool setOnDollGrid(Bit * clothingPiece);
     // int         negamax(std::string& state, int depth, int playerColor)
     
     Grid*       _gridDoll;

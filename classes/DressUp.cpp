@@ -2,7 +2,7 @@
 #include "../imgui/imgui.h"
 #include <map>
 
-std::map<int, std::string> clothes;
+std::map<int, std::string> clothes; // key: clothing_id, value: clothing_name
 
 //This is all really just to ensure when we press the button to open the game something is showing. Not attached to anything that exists here yet, and it barely works anyways
 DressUp::DressUp()
@@ -63,8 +63,16 @@ void DressUp::setUpBoard()
         for (int x = 0; x < _gridCloth->getWidth(); ++x) {
         // Example: create a Bit or ClothingPiece for each square
         Bit* bit = new Bit();
+        
         // Optionally, set a unique texture for each bit for testing
-        bit->LoadTextureFromFile("clothing_square.png");
+        std::string folder = "dressup\\";
+        std::string textureName = clothes.at(2);
+        const char * texturePath = folder.append(textureName).append(".png").c_str();
+        //const char * textureName = clothes.at((y * 3) + x).append("png").c_str();
+        bit->LoadTextureFromFile(texturePath);
+        ///TODO: set texture based on clothing type and some kind of index 
+
+        bit->setPosition(_gridCloth->getSquare(x,y)->getPosition()); // <-- Sync positions
         _gridCloth->getSquare(x, y)->setBit(bit);
         }
     }
@@ -91,17 +99,16 @@ void DressUp::setStateString(const std::string &s){
     // other 16 bits will be the clothing spaces
 }
 
+
+
 bool DressUp::actionForEmptyHolder(BitHolder &holder)
 {
     ImVec2 holderPosition = holder.getPosition();
     //printf("Clicked holder at position: (%f, %f)\n", holderPosition.x, holderPosition.y);
     //printf("Holder pointer: %p, Bit pointer: %p\n", &holder, holder.bit());
-
     
     std::cout << "Pos: " << "Clicked holder at position:" << holderPosition.x << holderPosition.y << std::endl;
     //Will need to adapt for replacing an item the doll already is wearing
-
-
 
     // based on the bit that is is the current/clicked holder we will then ask the 
     //bit what kind of clothing piece it is, and then load in the doll grid 
@@ -111,18 +118,36 @@ bool DressUp::actionForEmptyHolder(BitHolder &holder)
 
     ChessSquare* square = _gridCloth->getSquare(x, y);
     Bit* clothingPiece = holder.bit();
+
     if (square) {
         clothingPiece = square->bit();
     }
 
-    std::cout << "Pos: " << "Clothing piece:" << clothingPiece << std::endl;
 
+    if (clothingPiece){
+        std::cout << "Selected clothing piece:" << clothingPiece << std::endl;
+        // set this clothing piece on the doll grid
+        setOnDollGrid(clothingPiece);
+        return true; 
+    }
 
-
+    std::cout << "No selected clothing piece:" << std::endl;
     return false;
 
 
 
+}
+
+bool DressUp::setOnDollGrid(Bit* clothingPiece)
+{
+    
+    // find the correct column / index on the doll grid to place the selected clothing item on
+    
+
+    // if the doll grid already has an item there, redefine its contents. 
+    // else, set a new bit and add it there
+    _gridDoll->getSquare(0, 1)->setBit(clothingPiece);
+    return true;
 }
 
 
@@ -175,13 +200,29 @@ void DressUp::drawFrame()
         square->paintSprite();
     });
 
+    _gridDoll->forEachEnabledSquare([](ChessSquare* square, int x, int y){
+        if(square->bit()){
+            square->bit()->paintSprite();
+        }
+    });
+
     ImVec2 clothGridPosition = ImVec2(500, 50);
     ImGui::SetCursorPos(clothGridPosition);
     ImGui::Dummy(ImVec2(260, 260));
 
+
+    _gridCloth->forEachEnabledSquare([](ChessSquare* square, int x, int y){
+        if(square->bit()){
+            square->bit()->paintSprite();
+        }
+    });
+
     _gridCloth->forEachEnabledSquare([](ChessSquare* square, int x, int y){
         square->paintSprite();
     });
+
+
+
 
 }
 
