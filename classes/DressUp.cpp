@@ -1,11 +1,31 @@
 #include "DressUp.h"
 #include "../imgui/imgui.h"
+#include <map>
+
+std::map<int, std::string> clothes;
 
 //This is all really just to ensure when we press the button to open the game something is showing. Not attached to anything that exists here yet, and it barely works anyways
 DressUp::DressUp()
 {
-    _gridCloth = new Grid(4, 4);
+    _gridCloth = new Grid(3, 4);
     _gridDoll = new Grid(1, 4);
+
+    clothes.insert({1, "head_clean"}); // that's what im looking for 
+    clothes.insert({2, "head_yes"});
+    clothes.insert({3, "head_no_complaints"});
+    
+    clothes.insert({4, "shirt_reg"});
+    clothes.insert({5, "shirt_ugly"});
+    clothes.insert({6, "shirt_cool"});
+    
+    clothes.insert({7, "pants_stained"});
+    clothes.insert({8, "pants_bell_bottom"});
+    clothes.insert({9, "pants_well_fitted"});
+
+    clothes.insert({10, "shoes_yucky"});
+    clothes.insert({11, "shoes_wretched"});
+    clothes.insert({12, "shoes_sexy"});
+    
 }
 
 DressUp::~DressUp()
@@ -13,6 +33,13 @@ DressUp::~DressUp()
     delete _gridCloth;
     delete _gridDoll; 
 }
+
+enum ClothingType {
+    HAT,
+    SHIRT,
+    PANTS,
+    SHOES
+};
 
 void DressUp::setUpBoard()
 {
@@ -29,6 +56,19 @@ void DressUp::setUpBoard()
     offsetX = (spriteSize * _gridDoll->getWidth()) + spriteSize; // offsets by the width of the doll board, plus one sprite width
     offsetY = 0; // we don't need to shift vertically here
     _gridCloth->initializeSquaresWithOffset(offsetX, offsetY, spriteSize, spriteName);
+
+
+    //test adding bits to the clothing grid 
+    for (int y = 0; y < _gridCloth->getHeight(); ++y) {
+        for (int x = 0; x < _gridCloth->getWidth(); ++x) {
+        // Example: create a Bit or ClothingPiece for each square
+        Bit* bit = new Bit();
+        // Optionally, set a unique texture for each bit for testing
+        bit->LoadTextureFromFile("clothing_square.png");
+        _gridCloth->getSquare(x, y)->setBit(bit);
+        }
+    }
+
 
     startGame();
 }
@@ -60,17 +100,25 @@ bool DressUp::actionForEmptyHolder(BitHolder &holder)
     
     std::cout << "Pos: " << "Clicked holder at position:" << holderPosition.x << holderPosition.y << std::endl;
     //Will need to adapt for replacing an item the doll already is wearing
-    if (holder.bit()) {
-        return false;
+
+
+
+    // based on the bit that is is the current/clicked holder we will then ask the 
+    //bit what kind of clothing piece it is, and then load in the doll grid 
+    //the apprpricate piece in the approrpiate position/slot 
+    int x = static_cast<int>(holder.getPosition().x);
+    int y = static_cast<int>(holder.getPosition().y);
+
+    ChessSquare* square = _gridCloth->getSquare(x, y);
+    Bit* clothingPiece = holder.bit();
+    if (square) {
+        clothingPiece = square->bit();
     }
 
-    Bit *bit = PieceForPlayer(getCurrentPlayer()->playerNumber() == 0 ? HUMAN_PLAYER : AI_PLAYER);
-    if (bit) {
-        bit->setPosition(holder.getPosition());
-        holder.setBit(bit);
-        //endTurn();
-        return true;
-    }   
+    std::cout << "Pos: " << "Clothing piece:" << clothingPiece << std::endl;
+
+
+
     return false;
 
 

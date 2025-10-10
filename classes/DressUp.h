@@ -1,6 +1,7 @@
 #pragma once
 #include "Game.h"
 
+
 class DressUp : public Game
 {
     public:
@@ -33,4 +34,6 @@ private:
     
     Grid*       _gridDoll;
     Grid*       _gridCloth;
+
+    
 };
